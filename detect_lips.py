@@ -20,7 +20,7 @@ import cv2
 # args = vars(ap.parse_args())
 
 predictor_input = '/home/yafen/insight_project/Week1Demo/shape_predictor_68_face_landmarks.dat'
-img_file = '/home/yafen/insight_project/Week1Demo/img/taylorswift_test.jpg'
+img_file = '/home/yafen/insight_project/Week1Demo/taylorswift_test.jpg'
 
 def lip_landmarks(predictor_input, img_file):
 	# initialize dlib's face detector (HOG-based) and then create
@@ -68,6 +68,7 @@ shape = lip_landmarks(predictor_input,img_file)
 
 poly = list(tuple(map(tuple,shape)))
 image = cv2.imread(img_file)
+image = imutils.resize(image, width=500)
 ny,nx,channels = image.shape
 img = Image.new("L", [nx, ny], 0)
 ImageDraw.Draw(img).polygon(poly, outline=1, fill=1)
@@ -78,3 +79,13 @@ mask = np.array(img)
 # cv2.imshow("image",i)
 # cv2.waitKey(0)
 print(cv2.mean(image,mask))
+
+
+# w, h = 10, 10
+# data = np.zeros((h, w, 3), dtype=np.uint8)
+# data[:,:] = [222,51,28]
+
+# i = Image.fromarray(data,'RGB')
+
+# i.save('test.png')
+# i.show()
