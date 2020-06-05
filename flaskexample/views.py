@@ -6,7 +6,9 @@ Created on Thu Jun  4 12:43:38 2020
 @author: yafen
 """
 
+from flaskexample.a_Model import ModelIt
 from flask import render_template
+from flask import request
 from flaskexample import app
 from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database
@@ -16,11 +18,11 @@ import psycopg2
 # Python code to connect to Postgres
 # You may need to modify this based on your OS,
 # as detailed in the postgres dev setup materials.
-# user = 'postgres' #add your Postgres username here
-# host = 'localhost'
-# dbname = 'birth_db'
-# pswd = '112358'
-# db = create_engine('postgres://%s@%s/%s'%(user,host,dbname))
+user = 'yafen' #add your Postgres username here
+host = 'localhost'
+dbname = 'birth_db'
+pswd = '112358'
+db = create_engine('postgres://%s:%s@%s/%s'%(user,pswd,host,dbname))
 # con = None
 # con = psycopg2.connect(database = dbname, user = user)
 
@@ -33,15 +35,15 @@ def index():
 
 @app.route('/db')
 def birth_page():
-   # sql_query = """
-   #             SELECT * FROM birth_data_table WHERE delivery_method='Cesarean';
-   #             """
-   query_results = pd.read_csv('/home/yafen/insight_project/Week1Demo/ysl.csv')
-   colors = ""
+   sql_query = """
+               SELECT * FROM birth_data_table WHERE delivery_method='Cesarean';
+               """
+   query_results = pd.read_sql_query(sql_query,db)
+   births = ""
    for i in range(0,10):
-       colors += query_results.iloc[i]['color']
-       colors += "<br>"
-   return colors
+       births += query_results.iloc[i]['birth_month']
+       births += "<br>"
+   return births
 
 @app.route('/db_fancy')
 def cesareans_page_fancy():
@@ -53,3 +55,34 @@ def cesareans_page_fancy():
    for i in range(0,query_results.shape[0]):
        births.append(dict(index=query_results.iloc[i]['brand'], attendant=query_results.iloc[i]['color_code'], birth_month=query_results.iloc[i]['color']))
    return render_template('cesareans.html',births=births)
+
+@app.route('/input')
+def cesareans_input():
+   return render_template("input.html")
+
+@app.route('/output')
+def cesareans_output():
+     #pull 'birth_month' from input field and store it
+    patient = request.args.get('birth_month')
+   #just select the Cesareans  from the birth dtabase for the month that the user inputs
+    query = "SELECT index, attendant, birth_month FROM birth_data_table WHERE delivery_method='Cesarean' AND birth_month='%s'" % patient
+    print(query)
+    query_results=pd.read_sql_query(query,db)
+    print(query_results)
+    births = []
+    for i in range(0,query_results.shape[0]):
+        births.append(dict(index=query_results.iloc[i]['index'], attendant=query_results.iloc[i]['attendant'], birth_month=query_results.iloc[i]['birth_month']))
+        the_result = ModelIt(patient, births)
+    return render_template("output.html",births = births, the_result = the_result)
+
+@app.route('/inputTest')
+def addition_input():
+   return render_template("inputTest.html")
+
+@app.route('/outputTest')
+def addition_output():
+   num_one = float(request.args.get('first_number'))
+   num_two = float(request.args.get('second_number'))
+   sumofnums = num_one + num_two
+   print(sumofnums)
+   return render_template("outputTest.html", sumofnums = sumofnums)
