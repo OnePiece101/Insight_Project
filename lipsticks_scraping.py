@@ -19,10 +19,10 @@ def scraping_sephora(urls):
         web = requests.get(url)
         soup = BeautifulSoup(web.content)
         pdlist = soup.find_all('div',class_='css-1ax77m2')
-        lipsticks = product_list(pdlist, soup, lipsticks)
+        lipsticks = product_list(pdlist, soup, lipsticks, url)
     return lipsticks
 
-def product_list(pdlist, soup, lipsticks):
+def product_list(pdlist, soup, lipsticks, url):
     """input: 
             pdlist - a list of swatch img url scraped from sephora website
             soup - beautiful soup object of a specific product
@@ -34,6 +34,7 @@ def product_list(pdlist, soup, lipsticks):
         looks = soup.find_all('div',class_='css-1cvjr95')[0].text.split(':')[-1].strip()
         price = soup.find('div',class_='css-slwsq8').span.string
         product_id = pdlist[i].img['src'].split('/')[3].strip('s+w.jpg')
+        product_url = url+'?skuId='+product_id
         product_img_url = 'https://www.sephora.com/productimages/sku/s'+product_id+'-main-zoom.jpg?imwidth=60'
         color_img_url = 'https://www.sephora.com'+pdlist[i].img['src']
         color_code = json.loads(soup.find_all('script',{'type': 'application/ld+json'})[1].contents[0])['color'][i]
@@ -44,6 +45,7 @@ def product_list(pdlist, soup, lipsticks):
                             'brand': brand,
                             'looks': looks,  
                             'price': price,
+                            'product_url': product_url,
                             'product_img_url': product_img_url,
                              'color_img_url': color_img_url,
                              'color_code': color_code,
