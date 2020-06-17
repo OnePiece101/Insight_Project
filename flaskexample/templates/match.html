@@ -56,7 +56,7 @@
     </nav>
 <br><br>
 
-<div class="container">
+<!-- <div class="container">
 
 <div class="starter-template">
    <h2>Treat your Lips</h2>
@@ -86,19 +86,34 @@
 
 </div> <!-- /.container-->
 
+
 <div class="container">
  <div class="starter-template">
-   <h3>Results:</h3>
-   <p class="lead">We found the best matches<br> Please choose the lipstick you like and it'll direct you to the purchase website.</p>
+   <h2>Treat your Lips</h2>
+   <h4>paparazi's tips</h4>
  </div>
 
+<div class = "container">
+   {% if len_res != 5 %}
+   <form action='/upload', method=''>
+<img src={{filename}} height=200></img>
+         <p class="lead">{{ results }}</p>
+         <button type="submit">Try Again</button>
+   </form>
+   {% else %}
+   <h3>Congratulations! We found the best matches:</h3>
+   <p class="lead">Please choose the lipstick you like and it'll direct you to the purchase website.</p>
+
+
  <table class="table table-hover">
- <tr><th>brand</th><th>looks</th><th>color code</th><th>price</th><th>product</th></tr>
- {% for c in colors %}
- <tr><td>{{ c['brand'] }}</td><td>{{ c['looks']}}</td><td> {{ c['color_code'] }}</td><td>{{ c['price'] }}</td><td><a href={{ c['product']}}><img src={{ c['product_img']}} height=50 width=50></img></a></td></tr>
+  <tr><img src="{{filename}}" height=200></img></tr>
+ <tr><th>brand</th><th>looks</th><th>price</th><th>color code</th><th>color</th><th>product</th></tr>
+ {% for c in results %}
+ <tr><td>{{ c['brand'] }}</td><td>{{ c['looks']}}</td><td>{{ c['price'] }}</td><td>{{ c['color_code'] }}</td><td><img src={{ c['color_img']}} height=30 width=30></img></td><td><a href={{ c['product']}}><img src={{ c['product_img']}} height=50 width=50></img></a></td></tr>
  {% endfor %}
  </table>
-
+ {% endif %}
+</div>
  <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
  <script src="static/js/bootstrap.min.js"></script>
 
