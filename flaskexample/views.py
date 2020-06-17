@@ -14,6 +14,7 @@ from sqlalchemy import create_engine
 # from sqlalchemy_utils import database_exists, create_database
 import pandas as pd
 import numpy as np
+import time
 from flaskexample.lip_bgr import lip_landmarks
 # import psycopg2
 
@@ -141,22 +142,37 @@ def img_process():
     bgr = lip_landmarks(predictor_input,fname)
     return render_template("process.html", result = bgr, len_res = len(bgr))
 
-@app.route('/match')
+@app.route('/match', methods=['GET','POST'])
 def best_match():
      #pull 'birth_month' from input field and store it
-    bgr_txt = request.args.get('result')
-    bgr_vals = np.reshape(np.array([float(e) for e in bgr_txt.split(',')],dtype='float32'),(1,-1))
+    f = request.files['file']
+    timestr = time.strftime("%Y%m%d-%H%M%S")
+    fname = 'static/image/' + timestr
+    f.save('flaskexample/'+fname)
+    predictor_input = '/home/yafen/insight_project/Demos/shape_predictor_68_face_landmarks.dat'
+    lip_detection = lip_landmarks(predictor_input,f.filename)
+    try:
+        bgr_vals = np.reshape(np.array(lip_detection,dtype='float32'),(1,-1))
+    # bgr_txt = request.args.get('result')
+    # bgr_vals = np.reshape(np.array([float(e) for e in bgr_txt.split(',')],dtype='float32'),(1,-1))
    #just select the Cesareans  from the birth dtabase for the month that the user inputs
-    query = "SELECT brand,price,looks,color_code,product_img_url,product_url,bgr_mean FROM lipsticks_bgr_table;"
-    query_results=pd.read_sql_query(query,db)
-    print(query_results)
-    df_sephora = ColorID(query_results, bgr_vals)
-    colors = []
-    for i in range(0,df_sephora.shape[0]):
-        colors.append(dict(brand=df_sephora.iloc[i]['brand'],
-                          looks=df_sephora.iloc[i]['looks'],
-                          color_code=df_sephora.iloc[i]['color_code'],
-                          product_img=df_sephora.iloc[i]['product_img_url'],
-                          price=df_sephora.iloc[i]['price'],
-                          product = df_sephora.iloc[i]['product_url']))        
-    return render_template("match.html",colors = colors)
+        query = "SELECT brand,price,looks,color_code,color_img_url,product_img_url,product_url,bgr_mean FROM lipsticks_bgr_table;"
+        query_results=pd.read_sql_query(query,db)
+    # print(query_results)
+        df_sephora = ColorID(query_results, bgr_vals)
+        results = []
+        try:
+            for i in range(0,df_sephora.shape[0]):
+                results.append(dict(brand=df_sephora.iloc[i]['brand'],
+                                  looks=df_sephora.iloc[i]['looks'],
+                                  color_code=df_sephora.iloc[i]['color_code'],
+                                  color_img=df_sephora.iloc[i]['color_img_url'],
+                                  product_img=df_sephora.iloc[i]['product_img_url'],
+                                  price=df_sephora.iloc[i]['price'],
+                                  color_distance=df_sephora.iloc[i]['color_distance'],
+                                  product = df_sephora.iloc[i]['product_url']))
+        except:
+            results = df_sephora
+    except:
+        results = lip_detection
+    return render_template("match.html",results = results, len_res = len(results), filename=fname)
