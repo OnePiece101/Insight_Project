@@ -19,8 +19,8 @@ import cv2
 # 	help="path to input image")
 # args = vars(ap.parse_args())
 
-predictor_input = '/home/yafen/insight_project/Demos/shape_predictor_68_face_landmarks.dat'
-img_file = '/home/yafen/insight_project/Demos/taylorswift_test.jpg'
+# predictor_input = '/home/yafen/insight_project/Demos/shape_predictor_68_face_landmarks.dat'
+# img_file = '/home/yafen/insight_project/Demos/taylorswift_test.jpg'
 
 def lip_landmarks(predictor_input, img_file):
     # initialize dlib's face detector (HOG-based) and then create
@@ -73,10 +73,10 @@ def lip_landmarks(predictor_input, img_file):
     elif len(rects) == 0:
         return 'Are you sure there is a human being in the photo? Please choose another photo.'
     else: 
-        return 'There may be more one one faces in the photo. Please choose another one.'
+        return 'There may be more than one faces in the photo. Please choose another one.'
 
 # cv2.imshow("Output", lip_landmarks(predictor_input,img_file)[0])
-print(lip_landmarks(predictor_input,img_file))
+# print(len(lip_landmarks(predictor_input,img_file)))
 
 # poly = list(tuple(map(tuple,shape)))
 # image = cv2.imread(img_file)
